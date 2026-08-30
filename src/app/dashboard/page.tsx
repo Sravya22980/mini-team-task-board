@@ -3,20 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/Navbar";
 import CreateTeamForm from "@/components/CreateTeamForm";
 import JoinTeamForm from "@/components/JoinTeamForm";
-import { UserPlus, ArrowRight, Users } from "lucide-react";
-
-const ICON_STYLES = [
-  { bg: "bg-indigo-100", emoji: "🎓" },
-  { bg: "bg-emerald-100", emoji: "🎁" },
-  { bg: "bg-amber-100", emoji: "🚀" },
-  { bg: "bg-sky-100", emoji: "📋" },
-  { bg: "bg-pink-100", emoji: "✨" },
-];
-
-function iconFor(id: string) {
-  const hash = Array.from(id).reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return ICON_STYLES[hash % ICON_STYLES.length];
-}
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -42,86 +28,46 @@ export default async function DashboardPage() {
     .filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{background: "#F9F6FE"}}>
-      <Navbar userName={profile?.name} userEmail={user?.email} />
-      <main className="mx-auto max-w-5xl px-4 py-10" >
-        <h1 className="text-3xl font-bold text-gray-900">Your teams</h1>
+    <div>
+      <Navbar userName={profile?.name} />
+
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        <h1 className="text-2xl font-semibold text-gray-900">Your teams</h1>
         <p className="mt-1 text-sm text-gray-500">
           Create a new team, or join one with an invite code from a teammate.
         </p>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100">
-                <UserPlus className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-indigo-600">Create a team</h2>
-                <p className="text-xs text-gray-500">
-                  Start a new team and invite your teammates to collaborate.
-                </p>
-              </div>
-            </div>
+        <div className="mt-6 grid gap-4 rounded-2xl bg-white p-5 shadow-sm sm:grid-cols-2">
+          <div>
+            <h2 className="mb-2 text-sm font-semibold text-gray-700">Create a team</h2>
             <CreateTeamForm />
           </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100">
-                <ArrowRight className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-indigo-600">Join a team</h2>
-                <p className="text-xs text-gray-500">
-                  Enter an invite code to join an existing team.
-                </p>
-              </div>
-            </div>
+          <div>
+            <h2 className="mb-2 text-sm font-semibold text-gray-700">Join a team</h2>
             <JoinTeamForm />
           </div>
         </div>
 
-        <div className="mt-10">
-          <h2 className="mb-4 text-xl font-bold text-gray-900">Your Teams</h2>
-
+        <div className="mt-8">
           {teams.length === 0 ? (
             <p className="text-sm text-gray-500">
               You're not on a team yet. Create one or join with an invite code above.
             </p>
           ) : (
-            <ul className="space-y-3">
-              {teams.map((team: any) => {
-                const icon = iconFor(team.id);
-                return (
-                  <li
-                    key={team.id}
-                    className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {teams.map((team: any) => (
+                <li key={team.id}>
+                  <Link
+                    href={`/teams/${team.id}`}
+                    className="block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-brand-300 hover:shadow-md"
                   >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-11 w-11 items-center justify-center rounded-xl text-lg ${icon.bg}`}
-                      >
-                        {icon.emoji}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">{team.name}</p>
-                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                          <Users className="h-3.5 w-3.5" />
-                          Invite code:{" "}
-                          <span className="font-mono">{team.invite_code}</span>
-                        </p>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/teams/${team.id}`}
-                      className="rounded-lg border border-indigo-200 px-4 py-1.5 text-sm font-medium text-indigo-600 transition hover:bg-indigo-50"
-                    >
-                      View team
-                    </Link>
-                  </li>
-                );
-              })}
+                    <p className="font-medium text-gray-900">{team.name}</p>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Invite code: <span className="font-mono">{team.invite_code}</span>
+                    </p>
+                  </Link>
+                </li>
+              ))}
             </ul>
           )}
         </div>
