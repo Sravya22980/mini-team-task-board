@@ -51,7 +51,7 @@ export default async function BoardPage({ params }: { params: { boardId: string 
 
   return (
     <div>
-      <Navbar userName={profile?.name} />
+      <Navbar userName={profile?.name} userEmail={user?.email} />
       <main className="mx-auto max-w-6xl px-4 py-10">
         <Link href={`/teams/${board.team_id}`} className="text-sm text-brand-600 hover:underline">
           ← Back to team
