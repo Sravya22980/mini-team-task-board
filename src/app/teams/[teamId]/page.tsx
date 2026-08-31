@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/Navbar";
 import CreateBoardForm from "@/components/CreateBoardForm";
+import { ArrowLeft, KanbanSquare, Users } from "lucide-react";
 
 export default async function TeamPage({ params }: { params: { teamId: string } }) {
   const supabase = createClient();
@@ -32,24 +33,33 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
     .eq("team_id", team.id)
     .order("created_at", { ascending: true });
 
-  return (
-    <div>
-      <Navbar userName={profile?.name} />
+  const { count: memberCount } = await supabase
+    .from("team_members")
+    .select("*", { count: "exact", head: true })
+    .eq("team_id", team.id);
 
-      <main className="mx-auto max-w-4xl px-4 py-10">
-        <Link href="/dashboard" className="text-sm text-brand-600 hover:underline">
-          ← All teams
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar userName={profile?.name} userEmail={user?.email} />
+
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:underline"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          All teams
         </Link>
 
         <div className="mt-2 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">{team.name}</h1>
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500">
-            Invite code: <span className="font-mono font-medium">{team.invite_code}</span>
+          <h1 className="text-3xl font-bold text-gray-900">{team.name}</h1>
+          <span className="rounded-full bg-indigo-50 px-4 py-1.5 text-sm text-indigo-600">
+            Invite code: <span className="font-mono font-semibold">{team.invite_code}</span>
           </span>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
-          <h2 className="mb-2 text-sm font-semibold text-gray-700">New board</h2>
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-3 font-semibold text-gray-900">New board</h2>
           <CreateBoardForm teamId={team.id} />
         </div>
 
@@ -57,14 +67,23 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
           {!boards || boards.length === 0 ? (
             <p className="text-sm text-gray-500">No boards yet. Create the first one above.</p>
           ) : (
-            <ul className="grid gap-3 sm:grid-cols-2">
+            <ul className="grid gap-4 sm:grid-cols-2">
               {boards.map((board) => (
                 <li key={board.id}>
                   <Link
                     href={`/boards/${board.id}`}
-                    className="block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-brand-300 hover:shadow-md"
+                    className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-indigo-300 hover:shadow-md"
                   >
-                    <p className="font-medium text-gray-900">{board.name}</p>
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100">
+                      <KanbanSquare className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{board.name}</p>
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                        <Users className="h-3.5 w-3.5" />
+                        {memberCount ?? "—"} members
+                      </p>
+                    </div>
                   </Link>
                 </li>
               ))}
