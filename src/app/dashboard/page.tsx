@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/Navbar";
 import CreateTeamForm from "@/components/CreateTeamForm";
 import JoinTeamForm from "@/components/JoinTeamForm";
-import { UserPlus, ArrowRight, Users } from "lucide-react";
+import TeamCard from "@/components/TeamCard";
+import { UserPlus, ArrowRight } from "lucide-react";
 
 const ICON_STYLES = [
   { bg: "bg-indigo-100", emoji: "🎓" },
@@ -34,17 +34,39 @@ export default async function DashboardPage() {
   // team_members -> teams via join; RLS already restricts to this user's rows
   const { data: memberships } = await supabase
     .from("team_members")
-    .select("team_id, teams:team_id(id, name, invite_code)")
+    .select(
+      "team_id, teams:team_id(id, name, invite_code, created_at, created_by, creator:created_by(name))"
+    )
     .eq("user_id", user!.id);
 
   const teams = (memberships ?? [])
     .map((m: any) => m.teams)
     .filter(Boolean);
 
+  // Member counts per team (one query, grouped client-side since the
+  // Supabase JS client doesn't support GROUP BY aggregates directly).
+  const teamIds = teams.map((t: any) => t.id);
+  let memberCounts: Record<string, number> = {};
+
+  if (teamIds.length > 0) {
+    const { data: allMembers } = await supabase
+      .from("team_members")
+      .select("team_id")
+      .in("team_id", teamIds);
+
+    memberCounts = (allMembers ?? []).reduce(
+      (acc: Record<string, number>, row: any) => {
+        acc[row.team_id] = (acc[row.team_id] ?? 0) + 1;
+        return acc;
+      },
+      {}
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50" style={{background: "#F9F6FE"}}>
+    <div className="min-h-screen" style={{ background: "#F9F6FE" }}>
       <Navbar userName={profile?.name} userEmail={user?.email} />
-      <main className="mx-auto max-w-5xl px-4 py-10" >
+      <main className="mx-auto max-w-5xl px-4 py-10">
         <h1 className="text-3xl font-bold text-gray-900">Your teams</h1>
         <p className="mt-1 text-sm text-gray-500">
           Create a new team, or join one with an invite code from a teammate.
@@ -90,38 +112,19 @@ export default async function DashboardPage() {
               You're not on a team yet. Create one or join with an invite code above.
             </p>
           ) : (
-            <ul className="space-y-3">
-              {teams.map((team: any) => {
-                const icon = iconFor(team.id);
-                return (
-                  <li
-                    key={team.id}
-                    className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-11 w-11 items-center justify-center rounded-xl text-lg ${icon.bg}`}
-                      >
-                        {icon.emoji}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">{team.name}</p>
-                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                          <Users className="h-3.5 w-3.5" />
-                          Invite code:{" "}
-                          <span className="font-mono">{team.invite_code}</span>
-                        </p>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/teams/${team.id}`}
-                      className="rounded-lg border border-indigo-200 px-4 py-1.5 text-sm font-medium text-indigo-600 transition hover:bg-indigo-50"
-                    >
-                      View team
-                    </Link>
-                  </li>
-                );
-              })}
+            <ul className="grid gap-5 sm:grid-cols-2">
+              {teams.map((team: any) => (
+                <TeamCard
+                  key={team.id}
+                  team={{
+                    ...team,
+                    memberCount: memberCounts[team.id] ?? 0,
+                    creatorName: team.creator?.name ?? "Unknown",
+                  }}
+                  icon={iconFor(team.id)}
+                  currentUserId={user!.id}
+                />
+              ))}
             </ul>
           )}
         </div>
