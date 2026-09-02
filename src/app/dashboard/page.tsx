@@ -71,15 +71,15 @@ export default async function DashboardPage() {
       userEmail={user?.email}
       title="Your teams"
       subtitle="Create a new team, or join one with an invite code from a teammate."
-      actions={
-        <Link
-          href="#create-team"
-          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
-        >
-          <Plus className="h-4 w-4" />
-          New Team
-        </Link>
-      }
+      // actions={
+      //   <Link
+      //     href="#create-team"
+      //     className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+      //   >
+      //     <Plus className="h-4 w-4" />
+      //     New Team
+      //   </Link>
+      // }
     >
       <div id="create-team" className="grid gap-5 scroll-mt-24 sm:grid-cols-2">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

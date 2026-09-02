@@ -137,7 +137,7 @@ export default function TeamCard({
               href={`/teams/${team.id}`}
               className="rounded-lg border border-indigo-200 px-4 py-1.5 text-sm font-medium text-indigo-600 transition hover:bg-indigo-50"
             >
-              View team
+              View boards
             </Link>
           </div>
         )}

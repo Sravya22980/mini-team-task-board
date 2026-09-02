@@ -49,7 +49,7 @@ export default function Sidebar({
           </div>
           <div className="leading-tight">
             <p className="text-lg font-bold text-white">
-              Task<span className="text-indigo-300">Board</span>
+              Task<span className="text-indigo-300">Gen</span>
             </p>
             <p className="text-[11px] text-indigo-300">Team Task Management</p>
           </div>
