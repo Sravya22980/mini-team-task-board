@@ -128,7 +128,7 @@ export default function TeamCard({
         ) : (
           <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
             <div>
-              <span className="px-1 py-1 font-mono text-xs text-gray-600">Invite Code: </span>
+              <span className="px-1 py-1 font-mono text-xs text-gray-600">Invite code: </span>
               <span className="rounded-md bg-gray-100 px-2 py-1 font-mono text-xs text-gray-600">
                 {team.invite_code}
               </span>
