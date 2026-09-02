@@ -108,8 +108,6 @@ export default function BoardView({
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold text-gray-900">{boardName}</h1>
-
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {lists.map((list) => (
