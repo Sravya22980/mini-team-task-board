@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Pencil, Trash2, Users, Check, X } from "lucide-react";
+import { Pencil, Trash2, Users } from "lucide-react";
+import TeamManageModal from "./TeamManageModal";
 
 type Team = {
   id: string;
@@ -39,33 +40,10 @@ export default function TeamCard({
   const supabase = createClient();
   const isOwner = team.created_by === currentUserId;
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(team.name);
+  const [isManaging, setIsManaging] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  async function handleSaveName() {
-    const trimmed = name.trim();
-    if (!trimmed || trimmed === team.name) {
-      setName(team.name);
-      setIsEditing(false);
-      return;
-    }
-    setSaving(true);
-    setError(null);
-    const { error } = await supabase
-      .from("teams")
-      .update({ name: trimmed })
-      .eq("id", team.id);
-    setSaving(false);
-    if (error) {
-      setError("Couldn't rename team.");
-      return;
-    }
-    setIsEditing(false);
-    router.refresh();
-  }
 
   async function handleDelete() {
     setSaving(true);
@@ -92,43 +70,7 @@ export default function TeamCard({
               {icon.emoji}
             </div>
             <div>
-              {isEditing && isOwner ? (
-                <div className="flex items-center gap-1">
-                  <input
-                    autoFocus
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSaveName();
-                      if (e.key === "Escape") {
-                        setName(team.name);
-                        setIsEditing(false);
-                      }
-                    }}
-                    className="rounded-md border border-gray-300 px-2 py-1 text-sm font-semibold text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                  <button
-                    onClick={handleSaveName}
-                    disabled={saving}
-                    aria-label="Save team name"
-                    className="rounded-md p-1 text-emerald-600 hover:bg-emerald-50"
-                  >
-                    <Check className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setName(team.name);
-                      setIsEditing(false);
-                    }}
-                    aria-label="Cancel"
-                    className="rounded-md p-1 text-gray-400 hover:bg-gray-50"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <p className="font-semibold text-gray-900">{team.name}</p>
-              )}
+              <p className="font-semibold text-gray-900">{team.name}</p>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
                 <Users className="h-3.5 w-3.5" />
                 {team.memberCount} {team.memberCount === 1 ? "member" : "members"}
@@ -141,11 +83,11 @@ export default function TeamCard({
             </div>
           </div>
 
-          {!isEditing && isOwner && (
+          {isOwner && (
             <div className="flex shrink-0 gap-1.5">
               <button
-                onClick={() => setIsEditing(true)}
-                aria-label="Rename team"
+                onClick={() => setIsManaging(true)}
+                aria-label="Manage team"
                 className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-indigo-600"
               >
                 <Pencil className="h-4 w-4" />
@@ -185,12 +127,12 @@ export default function TeamCard({
           </div>
         ) : (
           <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-              <div>
-                <span className="px-1 py-1 font-mono text-xs text-gray-600">Invite Code:  </span> 
-                <span className="rounded-md bg-gray-100 px-2 py-1 font-mono text-xs text-gray-600">
-                  {team.invite_code}
-                </span>
-              </div>
+            <div>
+              <span className="px-1 py-1 font-mono text-xs text-gray-600">Invite Code: </span>
+              <span className="rounded-md bg-gray-100 px-2 py-1 font-mono text-xs text-gray-600">
+                {team.invite_code}
+              </span>
+            </div>
             <Link
               href={`/teams/${team.id}`}
               className="rounded-lg border border-indigo-200 px-4 py-1.5 text-sm font-medium text-indigo-600 transition hover:bg-indigo-50"
@@ -200,6 +142,15 @@ export default function TeamCard({
           </div>
         )}
       </div>
+
+      {isManaging && (
+        <TeamManageModal
+          teamId={team.id}
+          teamName={team.name}
+          currentUserId={currentUserId}
+          onClose={() => setIsManaging(false)}
+        />
+      )}
     </li>
   );
 }

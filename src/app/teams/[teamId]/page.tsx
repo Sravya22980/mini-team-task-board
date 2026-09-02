@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppShell from "@/components/AppShell";
 import CreateBoardForm from "@/components/CreateBoardForm";
-import { ArrowLeft, KanbanSquare, Users } from "lucide-react";
+import BoardCard from "@/components/BoardCard";
+import { ArrowLeft } from "lucide-react";
 
 export default async function TeamPage({ params }: { params: { teamId: string } }) {
   const supabase = createClient();
@@ -33,11 +34,6 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
     .eq("team_id", team.id)
     .order("created_at", { ascending: true });
 
-  const { count: memberCount } = await supabase
-    .from("team_members")
-    .select("*", { count: "exact", head: true })
-    .eq("team_id", team.id);
-
   return (
     <AppShell
       userId={user!.id}
@@ -65,23 +61,7 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2">
             {boards.map((board) => (
-              <li key={board.id}>
-                <Link
-                  href={`/boards/${board.id}`}
-                  className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-indigo-300 hover:shadow-md"
-                >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100">
-                    <KanbanSquare className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{board.name}</p>
-                    <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                      <Users className="h-3.5 w-3.5" />
-                      {memberCount ?? "—"} members
-                    </p>
-                  </div>
-                </Link>
-              </li>
+              <BoardCard key={board.id} board={board} />
             ))}
           </ul>
         )}
