@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Navbar from "@/components/Navbar";
+import AppShell from "@/components/AppShell";
 import BoardView from "@/components/BoardView";
 
 export default async function BoardPage({ params }: { params: { boardId: string } }) {
@@ -50,21 +50,23 @@ export default async function BoardPage({ params }: { params: { boardId: string 
   const members = (memberRows ?? []).map((m: any) => m.profiles).filter(Boolean);
 
   return (
-    <div>
-      <Navbar userName={profile?.name} userEmail={user?.email} />
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        <Link href={`/teams/${board.team_id}`} className="text-sm text-brand-600 hover:underline">
-          ← Back to team
-        </Link>
-        <div className="mt-2">
-          <BoardView
-            boardName={board.name}
-            initialLists={lists ?? []}
-            initialCards={cards ?? []}
-            members={members}
-          />
-        </div>
-      </main>
-    </div>
+    <AppShell
+      userId={user!.id}
+      userName={profile?.name}
+      userEmail={user?.email}
+      title={board.name}
+    >
+      <Link href={`/teams/${board.team_id}`} className="text-sm text-indigo-600 hover:underline">
+        ← Back to team
+      </Link>
+      <div className="mt-2">
+        <BoardView
+          boardName={board.name}
+          initialLists={lists ?? []}
+          initialCards={cards ?? []}
+          members={members}
+        />
+      </div>
+    </AppShell>
   );
 }

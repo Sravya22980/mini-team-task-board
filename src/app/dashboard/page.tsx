@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import Navbar from "@/components/Navbar";
+import AppShell from "@/components/AppShell";
 import CreateTeamForm from "@/components/CreateTeamForm";
 import JoinTeamForm from "@/components/JoinTeamForm";
 import TeamCard from "@/components/TeamCard";
-import { UserPlus, ArrowRight } from "lucide-react";
+import { UserPlus, ArrowRight, Plus } from "lucide-react";
 
 const ICON_STYLES = [
   { bg: "bg-indigo-100", emoji: "🎓" },
@@ -64,71 +65,78 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "#F9F6FE" }}>
-      <Navbar userName={profile?.name} userEmail={user?.email} />
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        <h1 className="text-3xl font-bold text-gray-900">Your teams</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Create a new team, or join one with an invite code from a teammate.
-        </p>
-
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100">
-                <UserPlus className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-indigo-600">Create a team</h2>
-                <p className="text-xs text-gray-500">
-                  Start a new team and invite your teammates to collaborate.
-                </p>
-              </div>
+    <AppShell
+      userId={user!.id}
+      userName={profile?.name}
+      userEmail={user?.email}
+      title="Your teams"
+      subtitle="Create a new team, or join one with an invite code from a teammate."
+      actions={
+        <Link
+          href="#create-team"
+          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+        >
+          <Plus className="h-4 w-4" />
+          New Team
+        </Link>
+      }
+    >
+      <div id="create-team" className="grid gap-5 scroll-mt-24 sm:grid-cols-2">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100">
+              <UserPlus className="h-5 w-5 text-indigo-600" />
             </div>
-            <CreateTeamForm />
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100">
-                <ArrowRight className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-indigo-600">Join a team</h2>
-                <p className="text-xs text-gray-500">
-                  Enter an invite code to join an existing team.
-                </p>
-              </div>
+            <div>
+              <h2 className="font-semibold text-indigo-600">Create a team</h2>
+              <p className="text-xs text-gray-500">
+                Start a new team and invite your teammates to collaborate.
+              </p>
             </div>
-            <JoinTeamForm />
           </div>
+          <CreateTeamForm />
         </div>
 
-        <div className="mt-10">
-          <h2 className="mb-4 text-xl font-bold text-gray-900">Your Teams</h2>
-
-          {teams.length === 0 ? (
-            <p className="text-sm text-gray-500">
-              You're not on a team yet. Create one or join with an invite code above.
-            </p>
-          ) : (
-            <ul className="grid gap-5 sm:grid-cols-2">
-              {teams.map((team: any) => (
-                <TeamCard
-                  key={team.id}
-                  team={{
-                    ...team,
-                    memberCount: memberCounts[team.id] ?? 0,
-                    creatorName: team.creator?.name ?? "Unknown",
-                  }}
-                  icon={iconFor(team.id)}
-                  currentUserId={user!.id}
-                />
-              ))}
-            </ul>
-          )}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100">
+              <ArrowRight className="h-5 w-5 text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-indigo-600">Join a team</h2>
+              <p className="text-xs text-gray-500">
+                Enter an invite code to join an existing team.
+              </p>
+            </div>
+          </div>
+          <JoinTeamForm />
         </div>
-      </main>
-    </div>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="mb-4 text-xl font-bold text-gray-900">Your Teams</h2>
+
+        {teams.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            You're not on a team yet. Create one or join with an invite code above.
+          </p>
+        ) : (
+          <ul className="grid gap-5 sm:grid-cols-2">
+            {teams.map((team: any) => (
+              <TeamCard
+                key={team.id}
+                team={{
+                  ...team,
+                  memberCount: memberCounts[team.id] ?? 0,
+                  creatorName: team.creator?.name ?? "Unknown",
+                }}
+                icon={iconFor(team.id)}
+                currentUserId={user!.id}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+    </AppShell>
   );
 }
