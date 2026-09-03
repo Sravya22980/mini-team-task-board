@@ -12,11 +12,13 @@ export default function BoardView({
   initialLists,
   initialCards,
   members,
+  currentUserId,
 }: {
   boardName: string;
   initialLists: List[];
   initialCards: Card[];
   members: Profile[];
+  currentUserId: string;
 }) {
   const supabase = createClient();
   const [lists] = useState<List[]>(initialLists);
@@ -127,6 +129,7 @@ export default function BoardView({
         <CardModal
           card={activeCard}
           members={members}
+          currentUserId={currentUserId}
           onClose={() => setActiveCard(null)}
           onSaved={handleCardSaved}
           onDeleted={handleCardDeleted}

@@ -50,6 +50,18 @@ export type Card = {
   updated_at: string;
 };
 
+export type Comment = {
+  id: string;
+  card_id: string;
+  user_id: string;
+  content: string;
+  file_url: string | null;
+  file_name: string | null;
+  created_at: string;
+  updated_at: string;
+  profiles?: { name: string } | null;
+};
+
 // Minimal Database type so @supabase/ssr generics compile without
 // running `supabase gen types`. Replace with generated types anytime.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

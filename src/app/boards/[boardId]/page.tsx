@@ -60,12 +60,13 @@ export default async function BoardPage({ params }: { params: { boardId: string 
         ← Back to team
       </Link>
       <div className="mt-2">
-        <BoardView
-          boardName={board.name}
-          initialLists={lists ?? []}
-          initialCards={cards ?? []}
-          members={members}
-        />
+      <BoardView
+        boardName={board.name}
+        initialLists={lists ?? []}
+        initialCards={cards ?? []}
+        members={members}
+        currentUserId={user!.id}
+      />
       </div>
     </AppShell>
   );
