@@ -3,16 +3,19 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Card, Profile } from "@/lib/types";
+import CommentSection from "./CommentSection";
 
 export default function CardModal({
   card,
   members,
+  currentUserId,
   onClose,
   onSaved,
   onDeleted,
 }: {
   card: Card;
   members: Profile[];
+  currentUserId: string;
   onClose: () => void;
   onSaved: (card: Card) => void;
   onDeleted: (cardId: string) => void;
@@ -70,7 +73,7 @@ export default function CardModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -145,6 +148,10 @@ export default function CardModal({
             >
               {saving ? "Saving…" : "Save changes"}
             </button>
+          </div>
+
+          <div className="border-t border-gray-100 pt-4">
+            <CommentSection cardId={card.id} currentUserId={currentUserId} />
           </div>
         </div>
       </div>
