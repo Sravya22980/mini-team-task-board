@@ -15,7 +15,14 @@ type Task = {
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function toDateKey(d: Date) {
-  return d.toISOString().slice(0, 10);
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
+function dateFromKey(key: string) {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day);
 }
 
 export default function CalendarView({ tasks }: { tasks: Task[] }) {
@@ -119,7 +126,7 @@ export default function CalendarView({ tasks }: { tasks: Task[] }) {
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <h3 className="mb-3 text-sm font-semibold text-gray-700">
           {selectedDate
-            ? new Date(selectedDate).toLocaleDateString(undefined, {
+            ? dateFromKey(selectedDate).toLocaleDateString(undefined, {
                 weekday: "long",
                 month: "short",
                 day: "numeric",

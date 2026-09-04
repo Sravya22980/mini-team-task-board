@@ -24,6 +24,7 @@ export default function Navbar({
   const initial = (userName || userEmail || "?").charAt(0).toUpperCase();
 
   return (
+    // navbar
     <header className="border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <Link href="/dashboard" className="flex items-center gap-2">
