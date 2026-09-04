@@ -41,7 +41,7 @@ export default function Sidebar({
   const initial = (userName || userEmail || "?").charAt(0).toUpperCase();
 
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col justify-between bg-gradient-to-b from-indigo-950 via-indigo-900 to-violet-900 px-4 py-6">
+    <aside className="flex h-full w-64 shrink-0 flex-col justify-between overflow-y-auto bg-gradient-to-b from-indigo-950 via-indigo-900 to-violet-900 px-4 py-6">
       <div>
         <Link href="/dashboard" className="mb-8 flex items-center gap-3 px-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white">
