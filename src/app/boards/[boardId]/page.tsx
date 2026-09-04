@@ -55,6 +55,7 @@ export default async function BoardPage({ params }: { params: { boardId: string 
       userName={profile?.name}
       userEmail={user?.email}
       title={board.name}
+      fullWidth
     >
       <Link href={`/teams/${board.team_id}`} className="text-sm text-indigo-600 hover:underline">
         ← Back to team

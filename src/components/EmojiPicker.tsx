@@ -35,7 +35,7 @@ export default function EmojiPicker({ onSelect }: { onSelect: (emoji: string) =>
       </button>
 
       {open && (
-        <div className="absolute bottom-full right-10 z-10 mb-2 grid w-56 grid-cols-8 gap-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+        <div className="absolute bottom-full right-40 z-10 mb-2 grid w-56 grid-cols-8 gap-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
           {EMOJIS.map((emoji) => (
             <button
               key={emoji}

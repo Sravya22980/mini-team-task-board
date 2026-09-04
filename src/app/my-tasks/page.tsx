@@ -1,11 +1,20 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import AppShell from "@/components/AppShell";
-import { CalendarDays } from "lucide-react";
+import CardItem from "@/components/CardItem";
+import ColumnEmptyState from "@/components/ColumnEmptyState";
+import { MoreVertical } from "lucide-react";
+import { columnTheme, type ColumnVariant } from "@/lib/columnTheme";
+import type { Card, Profile } from "@/lib/types";
 
-function isOverdue(dueDate: string | null) {
-  if (!dueDate) return false;
-  return new Date(dueDate) < new Date(new Date().toDateString());
+const COLUMNS: { key: ColumnVariant; title: string }[] = [
+  { key: "todo", title: "To Do" },
+  { key: "progress", title: "In Progress" },
+  { key: "done", title: "Done" },
+];
+
+function variantFromListName(name: string) {
+  return columnTheme(name).variant;
 }
 
 export default async function MyTasksPage() {
@@ -17,14 +26,15 @@ export default async function MyTasksPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name")
+    .select("name, email, created_at")
     .eq("id", user!.id)
     .single();
 
   const { data: myCards } = await supabase
     .from("cards")
-    .select("id, title, description, due_date, list_id")
-    .eq("assignee", user!.id);
+    .select("*")
+    .eq("assignee", user!.id)
+    .order("position", { ascending: true });
 
   const listIds = Array.from(new Set((myCards ?? []).map((c: any) => c.list_id)));
   const { data: lists } = listIds.length
@@ -32,27 +42,25 @@ export default async function MyTasksPage() {
     : { data: [] };
   const listsById = Object.fromEntries((lists ?? []).map((l: any) => [l.id, l]));
 
-  const boardIds = Array.from(new Set((lists ?? []).map((l: any) => l.board_id)));
-  const { data: boards } = boardIds.length
-    ? await supabase.from("boards").select("id, name").in("id", boardIds)
-    : { data: [] };
-  const boardsById = Object.fromEntries((boards ?? []).map((b: any) => [b.id, b.name]));
+  const currentUser: Profile | undefined = profile
+    ? {
+        id: user!.id,
+        name: profile.name,
+        email: profile.email ?? user?.email ?? "",
+        created_at: profile.created_at,
+      }
+    : undefined;
 
-  const tasks = (myCards ?? [])
-    .map((c: any) => {
-      const list = listsById[c.list_id];
-      return {
-        ...c,
-        listName: list?.name ?? "—",
-        boardId: list?.board_id,
-        boardName: boardsById[list?.board_id] ?? "Board",
-      };
-    })
-    .sort((a: any, b: any) => {
-      if (!a.due_date) return 1;
-      if (!b.due_date) return -1;
-      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-    });
+  const grouped: Record<ColumnVariant, Card[]> = {
+    todo: [],
+    progress: [],
+    done: [],
+  };
+
+  for (const card of myCards ?? []) {
+    const list = listsById[card.list_id];
+    grouped[variantFromListName(list?.name ?? "To Do")].push(card as Card);
+  }
 
   return (
     <AppShell
@@ -61,43 +69,60 @@ export default async function MyTasksPage() {
       userEmail={user?.email}
       title="My Tasks"
       subtitle="Every task assigned to you, across all your teams."
+      fullWidth
     >
-      {tasks.length === 0 ? (
-        <p className="text-sm text-gray-500">No tasks assigned to you yet.</p>
-      ) : (
-        <ul className="space-y-3">
-          {tasks.map((t: any) => (
-            <li key={t.id}>
-              <Link
-                href={`/boards/${t.boardId}`}
-                className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-indigo-300 hover:shadow-md"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-gray-900">{t.title}</p>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    {t.boardName} · {t.listName}
-                  </p>
-                </div>
-                {t.due_date && (
+      <div className="grid gap-5 lg:grid-cols-3">
+        {COLUMNS.map((col) => {
+          const theme = columnTheme(col.title);
+          const cards = grouped[col.key];
+
+          return (
+            <div
+              key={col.key}
+              className="flex min-h-[520px] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+            >
+              <div className={`h-1.5 w-full ${theme.bar}`} />
+              <div className="flex items-center justify-between px-5 py-4">
+                <div className="flex items-center gap-2.5">
+                  <h3 className="text-base font-semibold text-gray-900">{col.title}</h3>
                   <span
-                    className={`ml-3 flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-                      isOverdue(t.due_date)
-                        ? "bg-red-50 text-red-600"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
+                    className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-semibold ${theme.badge}`}
                   >
-                    <CalendarDays className="h-3.5 w-3.5" />
-                    {new Date(t.due_date).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {cards.length}
                   </span>
+                </div>
+                <MoreVertical className="h-4 w-4 text-gray-400" />
+              </div>
+
+              <div className="flex flex-1 flex-col gap-3 px-4 pb-4">
+                {cards.length === 0 ? (
+                  <ColumnEmptyState
+                    variant={theme.variant}
+                    title={theme.emptyTitle}
+                    subtitle={theme.emptySub}
+                  />
+                ) : (
+                  cards.map((card, index) => {
+                    const list = listsById[card.list_id];
+                    const boardId = list?.board_id;
+                    return (
+                      <Link key={card.id} href={boardId ? `/boards/${boardId}` : "/boards"}>
+                        <CardItem
+                          card={card}
+                          index={index}
+                          assignee={currentUser}
+                          onClick={() => {}}
+                          dragDisabled
+                        />
+                      </Link>
+                    );
+                  })
                 )}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </AppShell>
   );
 }
