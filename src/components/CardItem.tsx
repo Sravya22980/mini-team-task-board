@@ -38,7 +38,7 @@ export default function CardItem({
   card: Card;
   index: number;
   assignee?: Profile;
-  onClick: () => void;
+  onClick?: () => void;
   dragDisabled?: boolean;
 }) {
   const priority = priorityLabel(card.due_date);

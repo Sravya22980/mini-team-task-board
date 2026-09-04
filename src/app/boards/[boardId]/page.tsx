@@ -58,7 +58,7 @@ export default async function BoardPage({ params }: { params: { boardId: string 
       fullWidth
     >
       <Link href={`/teams/${board.team_id}`} className="text-sm text-indigo-600 hover:underline">
-        ← Back to team
+        ← Back to boards
       </Link>
       <div className="mt-2">
       <BoardView
