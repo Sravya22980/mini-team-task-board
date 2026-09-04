@@ -111,7 +111,6 @@ export default async function MyTasksPage() {
                           card={card}
                           index={index}
                           assignee={currentUser}
-                          onClick={() => {}}
                           dragDisabled
                         />
                       </Link>
